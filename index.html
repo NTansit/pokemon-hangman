@@ -38,12 +38,48 @@
         const endGameScene = document.getElementById("end-game")
 
         const startButton = document.getElementById("start-button")
+        const questionDisplay = document.getElementById("question")
+
+        let answer = ''
+
+        const startGamePlay = async() =>{
+            try{
+                const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0') //fetch api to get response
+                
+                if(!response.ok){
+                    throw new Error('Could not fetch data')
+                }
+
+                const responseJSON = await response.json() //transform response to JSON
+                const randomIndex = Math.floor(Math.random()*responseJSON.results.length)
+                
+                let selectedAnswer = responseJSON.results[randomIndex].name
+                answer = selectedAnswer
+
+                selectedAnswer = selectedAnswer.replace(/./g, "_")
+
+                questionDisplay.innerText = selectedAnswer
+                console.log('answer :' ,answer)
+                console.log('selectedAnswer :',selectedAnswer)
+
+            } catch (error){
+                console.log('error', error)
+                alert('Data Loading Error')
+            }
+        }
+
+
+
+
+
 
         startButton.addEventListener('click',()=>{
             // use .classList to add or remove class to html tags
             startGameScene.classList.add('hidden')      
             playGameScene.classList.remove('hidden')
             playGameScene.classList.add('play-center')  //control style through Javascript
+
+            startGamePlay()
         })
 
 

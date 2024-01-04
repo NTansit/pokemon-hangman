@@ -15,4 +15,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 10px;
+}
+
+.play-center > .question {
+  letter-spacing: 2px;
 }
