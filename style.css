@@ -9,3 +9,10 @@
   justify-content: center;
   align-items: center;
 }
+
+/* class play-center will be listed when in play state */
+.play-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
