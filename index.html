@@ -28,7 +28,7 @@
         <!-- state : end game -->
         <div id="end-game" class="hidden">
             <div id="end-message"></div>
-            <button id="reastart-button">Restart</button>
+            <button id="restart-button">Restart</button>
         </div>    
     </section>
     
@@ -37,10 +37,71 @@
         const playGameScene = document.getElementById("play-game")
         const endGameScene = document.getElementById("end-game")
 
+        //start scene
         const startButton = document.getElementById("start-button")
+
+        //game-play scene
         const questionDisplay = document.getElementById("question")
+        const answerButtonList = document.getElementById("answer-button")
+        const counterDisplay = document.getElementById("counter")
+        const restartGameButton = document.getElementById("restratgame-button")
+
+        //end scene
+        const endMessageDisplay = document.getElementById("end-message")
+        const restartEndGameButton = document.getElementById('restart-button')
+
+
+
+
+
 
         let answer = ''
+        let counter = 10
+
+        const endGamePlay = (displayText) =>{
+            endMessageDisplay.innerText = displayText
+
+            playGameScene.classList.add('hidden')
+            playGameScene.classList.remove('play-center')
+            endGameScene.classList.remove('hidden')
+        }
+
+
+        const generateAnswertList = () =>{
+            for(let i = 0; i < 26; i++){
+                let letter = String.fromCharCode('A'.charCodeAt(0)+i)
+                console.log('letter', letter)
+                let button = document.createElement('button')
+                button.innerText = letter
+
+                button.addEventListener('click',(event) => {
+                    let currentLetter = event.target.innerText.toLowerCase()
+                    console.log(currentLetter)
+                    let currentQuestion = questionDisplay.innerText.split('')
+                    
+                    for(let i = 0 ; i < answer.length ;i++ ){
+                        if(currentLetter === answer[i]){
+                            console.log('fount at', i)
+                            currentQuestion[i] = currentLetter
+                        }
+                    }
+                    currentAnswerQuestion = currentQuestion.join('')
+                    questionDisplay.innerText = currentAnswerQuestion
+
+                    event.target.disabled = true  //disable clicked button
+                    counter -= 1
+                    counterDisplay.innerText = counter
+
+                    if( counter === 0){
+                        endGamePlay('Game Over')
+                    }
+                    if( currentAnswerQuestion === answer){
+                        endGamePlay(`Success!! Answer is ${answer}`)
+                    }
+                })
+                answerButtonList.appendChild(button)
+            }
+        }
 
         const startGamePlay = async() =>{
             try{
@@ -59,8 +120,14 @@
                 selectedAnswer = selectedAnswer.replace(/./g, "_")
 
                 questionDisplay.innerText = selectedAnswer
-                console.log('answer :' ,answer)
                 console.log('selectedAnswer :',selectedAnswer)
+                console.log('answer :' ,answer)
+                
+                // add function for playin game
+                counter = 10 // reset counter
+                answerButtonList.innerHTML = ''
+                counterDisplay.innerText = counter // to display resetted counter
+                generateAnswertList()
 
             } catch (error){
                 console.log('error', error)
@@ -82,8 +149,19 @@
             startGamePlay()
         })
 
+        restartGameButton.addEventListener('click', ()=>{
+            playGameScene.classList.add('hidden')
+            playGameScene.classList.remove('play-center')
+            startGameScene.classList.remove('hidden')
+        })
 
+        restartEndGameButton.addEventListener('click', ()=>{
+            endGameScene.classList.add('hidden')
+            playGameScene.classList.remove('hidden')
+            playGameScene.classList.add('play-center')
 
+            startGamePlay()
+        })
 
 
 
