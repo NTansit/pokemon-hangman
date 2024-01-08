@@ -56,7 +56,9 @@
 
 
         let answer = ''
+        let state = ''
         let counter = 10
+        let answerList = []
 
         const endGamePlay = (displayText) =>{
             endMessageDisplay.innerText = displayText
@@ -64,15 +66,25 @@
             playGameScene.classList.add('hidden')
             playGameScene.classList.remove('play-center')
             endGameScene.classList.remove('hidden')
+            localStorage.clear()
+            //press restart after finish game
+            state = '' // remove duplicated a-z
+            answerList = [] //  remove hidden button -->> normal button
         }
 
 
         const generateAnswertList = () =>{
+            answerButtonList.innerHTML = ''
+
             for(let i = 0; i < 26; i++){
                 let letter = String.fromCharCode('A'.charCodeAt(0)+i)
                 console.log('letter', letter)
                 let button = document.createElement('button')
                 button.innerText = letter
+
+                if(answerList.includes(letter.toLocaleLowerCase())){
+                    button.disabled = true
+                }
 
                 button.addEventListener('click',(event) => {
                     let currentLetter = event.target.innerText.toLowerCase()
@@ -86,11 +98,16 @@
                         }
                     }
                     currentAnswerQuestion = currentQuestion.join('')
+                    localStorage.setItem('question', currentAnswerQuestion)
                     questionDisplay.innerText = currentAnswerQuestion
 
                     event.target.disabled = true  //disable clicked button
                     counter -= 1
                     counterDisplay.innerText = counter
+                    answerList.push(currentLetter)
+
+                    localStorage.setItem('counter', counter) // save counter every time clicking
+                    localStorage.setItem('answerList', JSON.stringify(answerList)) // object to string
 
                     if( counter === 0){
                         endGamePlay('Game Over')
@@ -104,7 +121,25 @@
         }
 
         const startGamePlay = async() =>{
+
+            console.log('answerList', answerList)
             try{
+                if (state === 'playing') {
+                    answer = localStorage.getItem('answer')
+                    let selectedAnswer = localStorage.getItem('question')
+                    questionDisplay.innerText = selectedAnswer
+
+                    let currentCounter = localStorage.getItem('counter')
+                    counterDisplay.innerText = currentCounter
+                    counter = currentCounter
+
+                    let answerListText = localStorage.getItem('answerList')
+                    if(answerListText){
+                        answerList = JSON.parse(answerListText) // string to object
+                    }
+                    generateAnswertList()    
+                    return false
+                }
                 const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0') //fetch api to get response
                 
                 if(!response.ok){
@@ -116,7 +151,7 @@
                 
                 let selectedAnswer = responseJSON.results[randomIndex].name
                 answer = selectedAnswer
-
+                state = 'playing'
                 selectedAnswer = selectedAnswer.replace(/./g, "_")
 
                 questionDisplay.innerText = selectedAnswer
@@ -125,8 +160,15 @@
                 
                 // add function for playin game
                 counter = 10 // reset counter
-                answerButtonList.innerHTML = ''
                 counterDisplay.innerText = counter // to display resetted counter
+                
+
+                // save state
+                localStorage.setItem('answer', answer) // saved answered question
+                localStorage.setItem('state', state) // save state of game
+                localStorage.setItem('question', selectedAnswer)  // save progress
+                localStorage.setItem('counter', counter)  
+                
                 generateAnswertList()
 
             } catch (error){
@@ -153,6 +195,8 @@
             playGameScene.classList.add('hidden')
             playGameScene.classList.remove('play-center')
             startGameScene.classList.remove('hidden')
+            localStorage.clear()
+            location.reload() //refresh website
         })
 
         restartEndGameButton.addEventListener('click', ()=>{
@@ -163,7 +207,12 @@
             startGamePlay()
         })
 
-
+        window.onload = () => {
+            state = localStorage.getItem('state')
+            if(state === 'playing'){
+                startButton.click()
+            }
+        }
 
 
     </script>
